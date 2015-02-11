@@ -1,0 +1,13 @@
+---
+# This playbook deploys the whole Dancer Web Framework application stack.
+  - hosts: web
+    roles:
+    - base-ubuntu
+    - app-dancer
+
+  - hosts: db
+    roles:
+    - base-ubuntu
+    - mariadb
+
+    

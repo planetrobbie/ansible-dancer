@@ -2,7 +2,7 @@
 # file: app-dancer/defaults/main.yml
 
 # under which user to install the application code
-username: ubuntu
+username: nicira
 
 # where to look for MySQL database access
 dbaddress: 192.168.3.10

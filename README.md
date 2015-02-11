@@ -17,20 +17,20 @@
 
 First edit your Ansible Inventory which should be located in `/etc/ansible/hosts` to add sections for web and db hosts
 
-  [web]
-  192.168.100.10
-  192.168.100.11
+  [web]  
+  192.168.100.10  
+  192.168.100.11  
 
-  [db]
-	192.168.200.10
-
+  [db]  
+	192.168.200.10  
+  
 You can now run the dancer Playbook, from your admin node run: 
 
   # ansible-playbook dancer.yml
 
 It's also possible to use Ansible Pull mode instead, to do so you just need to run the following command from each node :
 
-  # ansible-pull -C head -d /home/nicira -U git://github.com/planetrobbie/ansible-dancer >> /var/log/ansible-pull.log 2>&
+  # ansible-pull -i 'localhost,' -d /home/nicira/dancer -U git://github.com/planetrobbie/ansible-dancer >> /var/log/ansible-pull.log 2>&1
 
 `-C` define which repository branch to pull  
 `-d` directory to checkout git repository into.  

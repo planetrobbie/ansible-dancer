@@ -1,12 +1,8 @@
 ---
 # Bulb Ubuntu Base Setup
 
-  - name: Update APT package cache
-    apt: update_cache=yes cache_valid_time=3600
-
-  - name: Run apt-get upgrade
-    command: apt-get upgrade -y
-    tags: upgrade
+  - name: Update /etc/hosts
+    lineinfile: dest=/etc/hosts regexp={{ ansible_hostname }} line='127.0.0.1 {{ ansible_hostname }}' state=present
 
   - name: Install base packages
     apt: pkg={{ item }} state=installed
