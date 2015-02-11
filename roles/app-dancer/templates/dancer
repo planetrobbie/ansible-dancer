@@ -1,0 +1,24 @@
+#!/bin/sh
+# RainPole startup script
+# <brauns@vmware.com> @ Jun 12, 2012
+
+case "$1" in
+	'start')
+		if [ -x /home/{{ username }}/rainpole-0.1/bin/app.pl ]; then
+			echo -n "Starting RainPole webapp: "
+			/home/{{ username }}/rainpole-0.1/bin/app.pl -e production
+		fi
+		;;
+	'stop')
+		echo -n "Shutting down RainPole webapp"
+		kill -TERM `/usr/bin/pgrep perl`
+		;;
+
+	'restart')
+    	$0 stop
+    	$0 start
+    	;;
+	*)
+		echo "usage: $0 (start|stop)"
+		;;
+esac 

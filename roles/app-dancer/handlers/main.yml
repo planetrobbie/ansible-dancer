@@ -1,0 +1,5 @@
+---
+
+- name: restart dancer
+  service: name=dancer state=restarted enabled=yes
+

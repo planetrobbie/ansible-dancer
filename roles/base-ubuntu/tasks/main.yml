@@ -1,0 +1,102 @@
+---
+# Bulb Ubuntu Base Setup
+
+  - name: Update APT package cache
+    apt: update_cache=yes cache_valid_time=3600
+
+  - name: Run apt-get upgrade
+    command: apt-get upgrade -y
+    tags: upgrade
+
+  - name: Install base packages
+    apt: pkg={{ item }} state=installed
+    with_items:
+    - ntp
+    - zsh
+    - mosh
+    - byobu
+    - vim
+    - unattended-upgrades
+    - fail2ban
+    - git
+    - curl
+    - ufw
+
+  - name: Oh-My-Zsh for {{ username }}
+    git: repo=git://github.com/planetrobbie/oh-my-zsh.git dest=/home/{{ username }}/.oh-my-zsh accept_hostkey=yes
+    sudo_user: "{{ username }}"
+    sudo: yes
+
+  - name: dircolors
+    copy: src=dircolors dest=/home/{{ username }}/.dircolors owner={{ username }} mode=0644
+
+  - name: zshrc
+    template: src=zshrc.j2 dest=/home/{{ username }}/.zshrc owner={{ username }} mode=0644
+
+  - name: Set zsh as default shell
+    user: name={{ username }} shell=/usr/bin/zsh
+    sudo: yes
+
+  - name: byobu-enable for {{ username }}
+    command: /usr/bin/byobu-launcher-install
+    sudo_user: "{{ username }}"
+    sudo: yes
+
+  - name: Adjust APT update intervals
+    copy: src=apt_periodic dest=/etc/apt/apt.conf.d/10periodic
+
+  - name: set APT proxy
+    template: src=99proxy dest=/etc/apt/apt.conf.d/99proxy mode=0644
+    when: mirror_apt_url is defined
+
+  - name: Make sure unattended-upgrades only installs from $ubuntu_release-security
+    action: lineinfile dest=/etc/apt/apt.conf.d/50unattended-upgrades regexp="$ubuntu_release-updates" state=absent
+  
+  - name: Configure DNS resolver 
+    lineinfile: dest=/etc/resolv.conf state=present regexp='{{ nameserver }}' line='nameserver {{ nameserver }}'
+
+  - name: Resetting firewall
+    ufw: state=reset
+
+  - name: Firewall Rules
+    ufw: >
+      port={{ item.port if item.port is defined else "" }}
+      rule={{ item.rule if item.rule is defined else "allow" }}
+      proto={{ item.proto if item.proto is defined else "any" }}
+      to_ip="{{ item.to_ip if item.to_ip is defined else "any" }}"
+      from_ip="{{ item.from_ip if item.from_ip is defined else "any" }}"
+    with_items: ufw_rules
+    notify:
+      - restart ufw
+  
+  - name: Configuring application rules
+    ufw: >
+      name="{{ item.name }}"
+      rule={{ item.rule if item.rule is defined else "allow" }}
+    with_items: ufw_applications
+
+  - name: Firewall configuration
+    template: >
+      src=ufw.j2
+      dest=/etc/default/ufw
+      owner=root
+      group=root
+      mode=0644
+
+  - name: Configuring Firewall service
+    ufw: >
+      state={{ ufw_state }}
+      logging={{ ufw_logging }}
+
+  - name: rsyslog configuration
+    copy: src=rsyslog.conf dest=/etc/rsyslog.conf owner=root mode=0640
+    
+  - name: add rsyslog remote logger
+    lineinfile: dest=/etc/rsyslog.conf state=present insertafter=EOF line='{{ logger }}'
+    notify: 
+      - restart rsyslog
+
+  - name: NTP configuration
+    template: src=ntp.j2 dest=/etc/ntp.conf owner=root mode=0644
+    notify: 
+      - restart ntp

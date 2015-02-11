@@ -1,0 +1,6 @@
+---
+# file: maraidb/defaults/main.yml
+
+mysql_bind_address: '192.168.3.10'
+# production envt should use VAULT instead of cleartext password
+mysql_root_db_pass: 'thisisit'

@@ -1,0 +1,17 @@
+---
+
+  - name: install dancer Perl Framework
+    apt: name=libdancer-perl state=present
+
+  - name: send application code
+    unarchive: src=rainpole-0.1.tar.gz dest=/home/{{ username }}/ owner={{ username }}
+
+  - name: change database IP address in Rainpole Lib
+    replace: dest=/home/{{ username }}/rainpole-0.1/lib/rainpole.pm regexp='192.168.3.10' replace='{{ dbaddress }}'
+    notify: 
+      - restart dancer
+
+  - name: install startup script
+    template: src=dancer dest=/etc/init.d/ mode=700
+    notify: 
+      - restart dancer

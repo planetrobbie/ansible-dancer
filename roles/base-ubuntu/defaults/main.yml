@@ -1,0 +1,31 @@
+---
+# rsyslog destination
+# by default logging to both LogInsight and Elk
+ntpserver: 192.168.1.221
+nameserver: 192.168.1.221
+logger: '*.* @es01.bulb.int:5514;ls_json\n*.* @logs.bulb.int:514'
+
+# based on franklinkim.ufw role
+# ufw_rules:
+#   - { [port: ""] [rule: allow] [proto: any] [from_ip: any] [to_ip: any] }
+# ufw_applications:
+#   - { name: OpenSSH [rule: allow] }
+#
+
+# list of rules
+ufw_rules:
+  - rule=limit port=ssh proto=tcp
+
+# list of profiles located in /etc/ufw/applications.d
+ufw_applications:
+  - { name: OpenSSH, rule: allow }
+
+# /etc/defaut/ufw settings
+ufw_ipv6: "yes"
+ufw_default_input_policy: "DROP"
+ufw_default_output_policy: "ACCEPT"
+ufw_default_forward_policy: "DROP"
+ufw_default_application_policy: "SKIP"
+# firewall state: enabled | disabled
+ufw_state: enabled
+ufw_logging: "off"

@@ -1,0 +1,58 @@
+---
+#file: mariadb/tasks/main.yml
+
+- name: Setup ufw for remote MySQL access
+  shell: ufw allow 3306/tcp
+
+- name: Install MySQL (MariaDB) packages
+  apt: pkg={{ item }} state=latest
+  with_items:
+    - mariadb-server
+    - mariadb-client
+    - python-mysqldb
+
+- name: change bind address
+  replace: dest=/etc/mysql/my.cnf regexp='bind-address.*' replace='bind-address = {{ mysql_bind_address }}'
+
+- name: Start MySQL server
+  service: name=mysql state=started enabled=true
+
+- name: Delete unneeded users
+  action: >
+    mysql_user
+    user={{ item.user }}
+    host={{ item.host }}
+    state=absent
+  with_items:
+    - user: ''
+      host: '{{ ansible_hostname }}'
+    - user: ''
+      host: 'localhost'
+    - user: root
+      host: '{{ ansible_fqdn }}'
+      # {{ ansible_fqdn }} and {{ ansible_hostname}}
+      # might not return the correct value make sure
+      # all users are correct and have a password.
+
+- name: Delete anonymous MySQL server user for localhost
+  action: mysql_user user='' state=absent
+
+- name: Create Remote Access user
+  mysql_user: user=root password={{ mysql_root_db_pass }} host='%' priv=*.*:ALL state=present
+
+- name: Remove the test database
+  mysql_db: name=test state=absent
+
+- name: Update mysql root password for all root accounts
+  mysql_user: >
+    name=root
+    host="{{ item }}"
+    password="{{ mysql_root_db_pass }}"
+    state=present
+  with_items:
+   - 127.0.0.1
+   - ::1
+   - localhost
+
+- name: Create .my.cnf for root
+  template: src=.my.cnf dest=/root/.my.cnf

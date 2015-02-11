@@ -1,0 +1,10 @@
+---
+
+- name: restart rsyslog
+  service: name=rsyslog state=restarted enabled=yes
+
+- name: restart ntp
+  service: name=ntp state=restarted enabled=yes
+
+- name: reload ufw
+  command: ufw reload

@@ -1,0 +1,6 @@
+---
+# This playbook deploys the whole Dancer Web Framework application stack and an example application
+  - hosts: localhost
+    roles:
+    - base-ubuntu
+    - app-dancer
