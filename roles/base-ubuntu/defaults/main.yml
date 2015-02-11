@@ -1,8 +1,8 @@
 ---
 # rsyslog destination
 # by default logging to both LogInsight and Elk
-ntpserver: 192.168.1.221
-nameserver: 192.168.1.221
+ntpserver: 193.2.78.228
+nameserver: 8.8.4.4
 logger: '*.* @es01.bulb.int:5514;ls_json\n*.* @logs.bulb.int:514'
 
 # based on franklinkim.ufw role
